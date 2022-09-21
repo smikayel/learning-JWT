@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from users.views import UserAPIView
+# from ../User/serializer import UserSerializer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/user', UserAPIView.as_view())
 ]

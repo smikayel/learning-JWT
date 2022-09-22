@@ -7,6 +7,7 @@ class JWT_midleware(MiddlewareMixin):
         self.get_response = get_response
         self.WHITELISTED_URLS = [
         '/api/v1/user/auth',
+        '/api/v1/user',
         ]
 
     def checkGETpermissions(self, uuid, isAdmin, path):

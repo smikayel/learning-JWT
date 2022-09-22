@@ -5,7 +5,7 @@ from .models import User, Poll
 from rest_framework.views import APIView
 from rest_framework import status
 from django.http import JsonResponse
-import uuid
+import uuid, json
 import jwt, datetime
 
 
@@ -104,9 +104,9 @@ class PollCRUD(APIView):
             print(e)
             return JsonResponse({"data": "", "error": "Something went wrong"}, status=500)
 
-    def get(self, request):
-        lst = Poll.objects.all().values()
-        return JsonResponse({'data': list(lst)}, status = 200)
+    # def get(self, request):
+    #     lst = Poll.objects.all().values()
+    #     return JsonResponse({'data': list(lst)}, status = 200)
 
     def put(self, request):
         try:
@@ -127,13 +127,24 @@ def vote_fore_one(request, poll_uuid_slug):
     if request.method == "PUT":
         try:
             poll = Poll.objects.filter(uuid=poll_uuid_slug).values().get()
-            if request.data["option-id"] == 1:
-                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=((int(poll["firstOptionVoteCount"]) + 1)))
+            if json.loads(request.body)["option-id"] == 1:
+                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=int(poll["firstOptionVoteCount"]) + 1)
             else:
-                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=((int(poll["secondOptionVoteCount"]) + 1)))
+                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(secondOptionVoteCount=int(poll["secondOptionVoteCount"]) + 1)
             return JsonResponse({"data": votedPoll, "error": ""}, status=200)
         except Exception as e:
             print(e)
             return JsonResponse({"data": "", "error": "Not found!"}, status=404)
-
     return JsonResponse({"data": "", "error": "Something went wrong"}, status=500)
+
+def get_with_pagination(request, pagination_poll_query):
+    if request.method != "GET":
+        return JsonResponse({'Forbidden request': list(lst)}, status = 500)
+    start = pagination_poll_query.split('-')[0]
+    end = pagination_poll_query.split('-')[1]
+
+    if start and end:
+        lst = Poll.objects.all().values()[int(start): int(end) + 1]
+        return JsonResponse({'data': list(lst)}, status = 200)
+    else:
+        return JsonResponse({'Unrecognized query': pagination_poll_query}, status = 404)

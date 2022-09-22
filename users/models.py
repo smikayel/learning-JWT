@@ -20,9 +20,6 @@ class Poll(models.Model):
     firstOption = models.CharField(max_length=255)
     secondOption = models.CharField(max_length=255)
     
-    
-    
-    
     firstOptionVoteCount = models.IntegerField(default=0)
     secondOptionVoteCount = models.IntegerField(default=0)
     startDate = models.DateField()

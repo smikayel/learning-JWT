@@ -19,7 +19,12 @@ class Poll(models.Model):
     title = models.CharField(max_length=255)
     firstOption = models.CharField(max_length=255)
     secondOption = models.CharField(max_length=255)
-    voteCount = models.IntegerField(default=0)
+    
+    
+    
+    
+    firstOptionVoteCount = models.IntegerField(default=0)
+    secondOptionVoteCount = models.IntegerField(default=0)
     startDate = models.DateField()
     endDate = models.DateField()
     creator = models.ForeignKey(User, on_delete=models.CASCADE)

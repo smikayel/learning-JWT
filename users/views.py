@@ -127,9 +127,13 @@ def vote_fore_one(request, poll_uuid_slug):
     if request.method == "PUT":
         try:
             poll = Poll.objects.filter(uuid=poll_uuid_slug).values().get()
-            votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(voteCount=(int(poll["voteCount"]) + 1))
+            if request.data["option-id"] == 1:
+                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=((int(poll["firstOptionVoteCount"]) + 1)))
+            else:
+                votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=((int(poll["secondOptionVoteCount"]) + 1)))
             return JsonResponse({"data": votedPoll, "error": ""}, status=200)
-        except:
+        except Exception as e:
+            print(e)
             return JsonResponse({"data": "", "error": "Not found!"}, status=404)
 
     return JsonResponse({"data": "", "error": "Something went wrong"}, status=500)

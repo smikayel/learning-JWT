@@ -7,9 +7,6 @@ class JWT_midleware(MiddlewareMixin):
         self.get_response = get_response
         self.WHITELISTED_URLS = [
         '/api/v1/user/auth',
-         ]
-        self.ADMIN_URLS = [
-            '/api/v1/user'
         ]
 
     def checkGETpermissions(self, uuid, isAdmin, path):
@@ -24,23 +21,18 @@ class JWT_midleware(MiddlewareMixin):
                 token = response.headers["Authorization"]
             except:
                 return JsonResponse({'data': "Authorization Header is missing!"}, status=403)
+            if response.path.split('/')[-2] == "poll":
+                return self.get_response(response)
             #check Permissions
             if not token:
                 return JsonResponse({'data': "Unauthenticated!"}, status=403)
             try:
                 payload = jwt.decode(token, 'secret', algorithms=["HS256"])
-                # request  = response.GET.copy()
-                request = self.get_response(response)
-                print(response.method)
-                if response.method == "GET" or response.method == "DELETE":
-                    if self.checkGETpermissions(payload["uuid"], payload["isAdmin"], response.path):
-                        return request
-                    else:
-                        return JsonResponse({'data': "Forbidden!"}, status=403)   
-                return request
+                if payload["isAdmin"] == True:
+                    return self.get_response(response)
+                return JsonResponse({'data': "Forbidden"}, status=403)
             except Exception as e:
                 print(e)
-                response = JsonResponse({'data': "Wrong token!"}, status=403)
-                return response
+                return JsonResponse({'data': "Forbidden"}, status=403)
         return self.get_response(response)
      

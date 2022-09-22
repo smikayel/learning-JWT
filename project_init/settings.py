@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*+o0&0u6w6=*^%a%-yw4oqnd-4aks06*nog5$yuil69k#uod*_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -47,7 +47,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -81,13 +81,14 @@ WSGI_APPLICATION = 'project_init.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DATABASE', 'db'),
+        'NAME': os.environ.get('MYSQL_DATABASE', 'poll_app'),
         'USER': os.environ.get('MYSQL_USER', 'user'),
         'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'password'),
         'HOST': os.environ.get('MYSQL_DATABASE_HOST', 'localhost'),
         'PORT': os.environ.get('MYSQL_DATABASE_PORT', 3306),
     }
 }
+
 
 # #AUTENTIFICATION for jwt
 

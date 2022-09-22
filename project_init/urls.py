@@ -15,10 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from users.views import UserAPIView, UserAuthAPIView
+from users.views import UserAPIView, UserAuthAPIView, PollCRUD
+
+#functional view
+from users.views import vote_fore_one
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path('api/v1/user', UserAPIView.as_view()),
-    path('api/v1/user/auth', UserAuthAPIView.as_view())
+    path('api/v1/user/auth', UserAuthAPIView.as_view()),
+    path('api/v1/poll', PollCRUD.as_view()),
+    path('api/v1/poll/<slug:poll_uuid_slug>', vote_fore_one)
 ]
+  

@@ -1,4 +1,6 @@
+from pyexpat import model
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class User(models.Model):
@@ -10,3 +12,20 @@ class User(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class Poll(models.Model):
+    uuid = models.CharField(primary_key=True, max_length=255)
+    title = models.CharField(max_length=255)
+    firstOption = models.CharField(max_length=255)
+    secondOption = models.CharField(max_length=255)
+    
+    firstOptionVoteCount = models.IntegerField(default=0)
+    secondOptionVoteCount = models.IntegerField(default=0)
+    startDate = models.DateField()
+    endDate = models.DateField()
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.Title
+

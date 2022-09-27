@@ -1,7 +1,7 @@
 from django.forms import model_to_dict
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import User, Poll
+from .models import User, Poll, userPoll
 from rest_framework.views import APIView
 from rest_framework import status
 from django.http import JsonResponse
@@ -86,7 +86,8 @@ class UserAuthAPIView(APIView):
 
 class PollCRUD(APIView):
     def post(self, request):
-        try: 
+       
+        try:
             token = request.headers["Authorization"]
             payload = jwt.decode(token, 'secret', algorithms=["HS256"])
             creator = User.objects.get(uuid=payload["uuid"])
@@ -99,14 +100,10 @@ class PollCRUD(APIView):
                 endDate = datetime.datetime.utcnow(),
                 creator = creator
             )
-            return  JsonResponse(model_to_dict(createdPOLL),status=200)
+            return  JsonResponse(model_to_dict(createdPOLL), status=200)
         except Exception as e:
             print(e)
             return JsonResponse({"data": "", "error": "Something went wrong"}, status=500)
-
-    # def get(self, request):
-    #     lst = Poll.objects.all().values()
-    #     return JsonResponse({'data': list(lst)}, status = 200)
 
     def put(self, request):
         try:
@@ -114,6 +111,10 @@ class PollCRUD(APIView):
             return Response({'updated': updated})
         except:
             return Response({"data": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+    
+    def get(self, request):
+        lst = Poll.objects.all().values()
+        return JsonResponse({'data': list(lst)}, status = 200)
 
     def delete(self, request):
         Poll.objects.filter(pk=request.data["poll-uuid"]).delete()
@@ -122,15 +123,28 @@ class PollCRUD(APIView):
         except:
             return Response({'data': "Something went wrong..."}, status=status.HTTP_403_FORBIDDEN)
 
+def getVoted(request):
+    if request.method == "GET":
+        lst = userPoll.objects.all().values()
+        return JsonResponse({'data': list(lst)}, status = 200)
 
 def vote_fore_one(request, poll_uuid_slug):
     if request.method == "PUT":
         try:
+            token = request.headers["Authorization"]
+            payload = jwt.decode(token, 'secret', algorithms=["HS256"])
+            print(token)
+            creator = User.objects.get(uuid=payload["uuid"])
             poll = Poll.objects.filter(uuid=poll_uuid_slug).values().get()
             if json.loads(request.body)["option-id"] == 1:
                 votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(firstOptionVoteCount=int(poll["firstOptionVoteCount"]) + 1)
             else:
                 votedPoll =  Poll.objects.filter(uuid=poll_uuid_slug).update(secondOptionVoteCount=int(poll["secondOptionVoteCount"]) + 1)
+            voted = Poll.objects.get(uuid=poll_uuid_slug)
+            userPoll.objects.create(
+                poll = voted,
+                voted = creator
+            )
             return JsonResponse({"data": votedPoll, "error": ""}, status=200)
         except Exception as e:
             print(e)

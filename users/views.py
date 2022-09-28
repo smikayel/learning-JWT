@@ -7,6 +7,7 @@ from rest_framework import status
 from django.http import JsonResponse
 import uuid, json
 import jwt, datetime
+import math
 
 
 class UserAPIView(APIView):
@@ -98,7 +99,8 @@ class PollCRUD(APIView):
                 secondOption = request.data["secondOption"],
                 startDate = datetime.datetime.utcnow(),
                 endDate = datetime.datetime.utcnow(),
-                creator = creator
+                creator = creator,
+                isActive = True
             )
             return  JsonResponse(model_to_dict(createdPOLL), status=200)
         except Exception as e:
@@ -107,7 +109,7 @@ class PollCRUD(APIView):
 
     def put(self, request):
         try:
-            updated = Poll.objects.filter(pk=request.data["poll-uuid"]).update(title=request.data["title"])
+            updated = Poll.objects.filter(pk=request.data["poll-uuid"]).update(isActive=request.data["isActive"])
             return Response({'updated': updated})
         except:
             return Response({"data": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
@@ -152,8 +154,6 @@ def vote_fore_one(request, poll_uuid_slug):
     return JsonResponse({"data": "", "error": "Something went wrong"}, status=500)
 
 def get_with_pagination(request, pagination_poll_query):
-    if request.method != "GET":
-        return JsonResponse({'Forbidden request': list(lst)}, status = 500)
     start = pagination_poll_query.split('-')[0]
     end = pagination_poll_query.split('-')[1]
 
@@ -162,3 +162,12 @@ def get_with_pagination(request, pagination_poll_query):
         return JsonResponse({'data': list(lst)}, status = 200)
     else:
         return JsonResponse({'Unrecognized query': pagination_poll_query}, status = 404)
+
+
+def get_pages_urls(request):
+    pages_count =  len(Poll.objects.all().values()) / 10
+    pages_count = math.ceil(pages_count)
+    pages_urls = []
+    for page in range(0, pages_count):
+        pages_urls.append({"index": page + 1, "links": f'poll/pagination/{page * 10}-{(page + 1) * 10}'})
+    return JsonResponse({'data': list(pages_urls)}, status = 200)

@@ -25,14 +25,16 @@ class JWT_midleware(MiddlewareMixin):
                 token = response.headers["Authorization"]
             except Exception as e:
                 return JsonResponse({'data': "Authorization Header is missing!"}, status=403)
-            if response.path.split('/')[-2] == "poll":
+            
+            if response.path.split('/')[-2] == "poll" \
+                or response.path.split('/')[-1] == "home-pages-count" \
+                    or response.path.split('/')[-2] == "pagination":
                 return self.get_response(response)
             #check Permissions
             if not token:
                 return JsonResponse({'data': "Unauthenticated!"}, status=403)
             try:
                 payload = jwt.decode(token, 'secret', algorithms=["HS256"])
-               
                 if payload["isAdmin"] == True:
                     return self.get_response(response)
                 return JsonResponse({'data': "Forbidden"}, status=403)
